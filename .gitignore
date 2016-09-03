@@ -1,0 +1,8 @@
+.svn
+*.bak
+*.exe
+VS2015/.vs
+VS2015/Debug
+VS2015/ipch
+
+
