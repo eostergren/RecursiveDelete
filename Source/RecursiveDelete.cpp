@@ -5,8 +5,6 @@
 
 int DeleteDirectory(WCHAR * wpath);
 
-#define MAX_PATH_LENGTH 260
-
 int wmain(int argc, wchar_t * argv[])
 {
     if (argc > 1)
@@ -20,10 +18,10 @@ int DeleteDirectory(WCHAR * wpath)
 {
     WIN32_FIND_DATA FindFileData;
     HANDLE hFind;
-    WCHAR TargetPath[MAX_PATH_LENGTH];
-    WCHAR SearchPath[MAX_PATH_LENGTH];
-    errno_t result = wcscpy_s(SearchPath, MAX_PATH_LENGTH, wpath);
-    result |= wcscat_s(SearchPath, MAX_PATH_LENGTH, L"\\*.*");
+    WCHAR TargetPath[MAX_PATH];
+    WCHAR SearchPath[MAX_PATH];
+    errno_t result = wcscpy_s(SearchPath, MAX_PATH, wpath);
+    result |= wcscat_s(SearchPath, MAX_PATH, L"\\*.*");
     if (0 == result)
     {
         hFind = FindFirstFile(SearchPath, &FindFileData);
@@ -31,9 +29,9 @@ int DeleteDirectory(WCHAR * wpath)
         {
             do
             {
-                result = wcscpy_s(TargetPath, MAX_PATH_LENGTH, wpath);
-                result |= wcscat_s(TargetPath, MAX_PATH_LENGTH, L"\\");
-                result |= wcscat_s(TargetPath, MAX_PATH_LENGTH, FindFileData.cFileName);
+                result = wcscpy_s(TargetPath, MAX_PATH, wpath);
+                result |= wcscat_s(TargetPath, MAX_PATH, L"\\");
+                result |= wcscat_s(TargetPath, MAX_PATH, FindFileData.cFileName);
                 if(0 != result)
                 {
                     break;
@@ -49,9 +47,14 @@ int DeleteDirectory(WCHAR * wpath)
                             RemoveDirectory(TargetPath);
                         }
                     }
-                    else
-                    {
-                        // could modify read only attributes here if needed
+					else
+					{
+						DWORD file_attributes = GetFileAttributesW(TargetPath);
+						if((INVALID_FILE_ATTRIBUTES != file_attributes) &&
+							(file_attributes & FILE_ATTRIBUTE_READONLY))
+						{
+							SetFileAttributes(TargetPath, file_attributes & ~FILE_ATTRIBUTE_READONLY);
+						}
                         DeleteFile(TargetPath);
                     }
                 }
