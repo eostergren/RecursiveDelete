@@ -1,6 +1,7 @@
 .svn
 *.bak
 *.exe
+*.db
 VS2015/.vs
 VS2015/Debug
 VS2015/ipch
